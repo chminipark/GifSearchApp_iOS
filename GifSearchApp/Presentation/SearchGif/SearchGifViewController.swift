@@ -74,10 +74,10 @@ final class SearchGifViewController: UIViewController {
         
         self.searchGifViewModel.dataSource = UICollectionViewDiffableDataSource
         <Section, Gif> (collectionView: self.collectionView)
-        { collectionView, indexPath, gif -> SearchGifCollectionViewCell? in
-            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration,
-                                                                for: indexPath,
-                                                                item: gif)
+        { [weak self] collectionView, indexPath, gif -> SearchGifCollectionViewCell? in
+            let cell = collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: gif)
+            self?.searchGifViewModel.downloadGif(gif)
+            return cell
         }
     }
 }
