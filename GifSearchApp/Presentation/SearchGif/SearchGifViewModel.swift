@@ -23,35 +23,64 @@ class SearchGifViewModel {
     let decoder = SDImageAWebPCoder.shared
     var dataSource: UICollectionViewDiffableDataSource<Section, Gif>!
     var currentPage = Page()
-    var searchStrig: String = ""
+    var searchString: String = ""
     
     var viewState: ViewState = .idle
     let dispatchGroup = DispatchGroup()
     
     func paginationGif() {
         guard viewState == .idle,
-              searchStrig != ""
+              searchString != ""
         else {
             return
         }
-        
-//        loadData()
         fetchGifInfos()
     }
     
     func searchGif(with gifName: String) {
-        self.searchStrig = gifName
+        guard viewState == .idle,
+              gifName != ""
+        else {
+            return
+        }
+        searchString = gifName
         currentPage = Page()
-        
-//        loadData()
-        
         fetchGifInfos()
     }
 }
 
 extension SearchGifViewModel {
     func fetchGifInfos() {
+        let gifSearchRequestDTO = GifSearchRequestDTO(gifName: searchString, offset: currentPage.offset)
+        let endpoint = APIEndpoints.getGifSearchInfo(with: gifSearchRequestDTO)
         
+        viewState = .isLoding
+        provider.request(with: endpoint) { [weak self] result in
+            guard let _self = self else {
+                return
+            }
+            
+            _self.viewState = .idle
+            
+            switch result {
+            case .success(let data):
+                _self.currentPage = data.toDomainPage()
+                print(_self.currentPage.offset)
+                let gifInfos = data.toDomainGif()
+                var snapshot = _self.dataSource.snapshot()
+                if snapshot.sectionIdentifiers.isEmpty {
+                    snapshot.appendSections([.main])
+                }
+                snapshot.appendItems(gifInfos, toSection: .main)
+                // main or global???
+                DispatchQueue.global(qos: .background).async {
+                    _self.dataSource.apply(snapshot)
+                }
+            case .failure(let error):
+                print("😡😡😡😡")
+                print(error)
+            }
+        }
     }
     
     func downloadGif(_ gif: Gif) {

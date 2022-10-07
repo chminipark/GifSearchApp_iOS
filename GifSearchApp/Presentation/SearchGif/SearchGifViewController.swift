@@ -114,19 +114,19 @@ extension SearchGifViewController: UICollectionViewDelegate {
         let remainFromBottom = totalHeight - currentYOffset
 
         if remainFromBottom < frameHeight * 2 {
-//            searchGifViewModel.paginationGif()
+            searchGifViewModel.paginationGif()
         }
     }
 }
 
 extension SearchGifViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
-        print("😈😈😈😈😈😈😈😈test")
-        if !indexPaths.isEmpty {
-            for index in indexPaths {
-                print(index.row, terminator: " ")
-            }
-        }
+//        print("😈😈😈😈😈😈😈😈test")
+//        if !indexPaths.isEmpty {
+//            for index in indexPaths {
+//                print(index.row, terminator: " ")
+//            }
+//        }
     }
 }
 
