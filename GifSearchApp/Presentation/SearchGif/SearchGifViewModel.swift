@@ -19,14 +19,15 @@ enum ViewState {
 }
 
 class SearchGifViewModel {
-    lazy var provider: Provider = ProviderImpl()
-    let decoder = SDImageAWebPCoder.shared
+    private lazy var provider: Provider = ProviderImpl()
+    private lazy var imageCache = ImageCache(provider: provider)
+    
     var dataSource: UICollectionViewDiffableDataSource<Section, Gif>!
+    var viewState: ViewState = .idle
     var currentPage = Page()
     var searchString: String = ""
     
-    var viewState: ViewState = .idle
-    let dispatchGroup = DispatchGroup()
+    private let decoder = SDImageAWebPCoder.shared
     
     func paginationGif() {
         guard viewState == .idle,
@@ -84,7 +85,29 @@ extension SearchGifViewModel {
     }
     
     func downloadGif(_ gif: Gif) {
-        
+        imageCache.loadData(for: gif) { [weak self] item, gifData in
+            guard let _self = self else {
+                return
+            }
+            
+            guard let gifData = gifData,
+                  let gifObject = item as? Gif,
+                  gifObject.image != gifData
+            else {
+                return
+            }
+            
+            gifObject.image = gifData
+            
+            var snapshot = _self.dataSource.snapshot()
+            if snapshot.indexOfItem(gifObject) == nil {
+                return
+            }
+            snapshot.reloadItems([gifObject])
+            DispatchQueue.global(qos: .background).async {
+                _self.dataSource.apply(snapshot)
+            }
+        }
     }
 }
 
