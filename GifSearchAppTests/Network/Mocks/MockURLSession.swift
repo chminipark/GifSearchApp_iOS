@@ -18,7 +18,7 @@ class MockURLSession: URLSessionable {
     
     func dataTask(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
         
-        let endpoint = APIEndpoints.getGifSearchInfo(with: .init(gifName: "hello"))
+        let endpoint = APIEndpoints.getGifSearchInfo(with: .init(gifName: "hello", offset: 0))
         
         let successResponse = HTTPURLResponse(url: try! endpoint.makeURL(),
                                               statusCode: 200,
