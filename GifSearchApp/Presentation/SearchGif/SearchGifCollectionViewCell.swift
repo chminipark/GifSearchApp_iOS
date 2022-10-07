@@ -65,22 +65,3 @@ final class SearchGifCollectionViewCell: UICollectionViewCell {
         }
     }
 }
-//
-//final class LoadingContentView: UIView {
-//
-//    let indicatorView: UIActivityIndicatorView = {
-//        let indicator = UIActivityIndicatorView()
-//        indicator.style = UIActivityIndicatorView.Style.large
-//        return indicator
-//    }()
-//
-//    override init(frame: CGRect) {
-//        super.init(frame: frame)
-//
-//
-//    }
-//
-//    required init?(coder: NSCoder) {
-//        fatalError()
-//    }
-//}

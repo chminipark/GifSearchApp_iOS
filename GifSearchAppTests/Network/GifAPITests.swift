@@ -19,7 +19,7 @@ class GifAPITests: XCTestCase {
     
     func test_GifSearch_whenSuccess() {
         let expectation = XCTestExpectation()
-        let endpoint = APIEndpoints.getGifSearchInfo(with: .init(gifName: "hello"))
+        let endpoint = APIEndpoints.getGifSearchInfo(with: .init(gifName: "hello", offset: 0))
         let responseMock = try? JSONDecoder().decode(GifSearchResponseDTO.self, from: endpoint.sampleData!)
         
         sut.request(with: endpoint) { result in

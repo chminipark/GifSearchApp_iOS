@@ -19,30 +19,95 @@ enum ViewState {
 }
 
 class SearchGifViewModel {
-    lazy var provider: Provider = ProviderImpl()
-    let decoder = SDImageAWebPCoder.shared
-    var dataSource: UICollectionViewDiffableDataSource<Section, Gif>!
-    var currentPage = Page()
-    var searchStrig: String = ""
+    private lazy var provider: Provider = ProviderImpl()
+    private lazy var imageCache = ImageCache(provider: provider)
     
+    var dataSource: UICollectionViewDiffableDataSource<Section, Gif>!
     var viewState: ViewState = .idle
-    let dispatchGroup = DispatchGroup()
+    var currentPage = Page()
+    var searchString: String = ""
+    
+    private let decoder = SDImageAWebPCoder.shared
     
     func paginationGif() {
         guard viewState == .idle,
-              searchStrig != ""
+              searchString != ""
         else {
             return
         }
-        
-        loadData()
+        fetchGifInfos()
     }
     
     func searchGif(with gifName: String) {
-        self.searchStrig = gifName
+        guard viewState == .idle,
+              gifName != ""
+        else {
+            return
+        }
+        searchString = gifName
         currentPage = Page()
+        fetchGifInfos()
+    }
+}
+
+extension SearchGifViewModel {
+    func fetchGifInfos() {
+        let gifSearchRequestDTO = GifSearchRequestDTO(gifName: searchString, offset: currentPage.offset)
+        let endpoint = APIEndpoints.getGifSearchInfo(with: gifSearchRequestDTO)
         
-        loadData()
+        viewState = .isLoding
+        provider.request(with: endpoint) { [weak self] result in
+            guard let _self = self else {
+                return
+            }
+            
+            _self.viewState = .idle
+            
+            switch result {
+            case .success(let data):
+                _self.currentPage = data.toDomainPage()
+                print(_self.currentPage.offset)
+                let gifInfos = data.toDomainGif()
+                var snapshot = _self.dataSource.snapshot()
+                if snapshot.sectionIdentifiers.isEmpty {
+                    snapshot.appendSections([.main])
+                }
+                snapshot.appendItems(gifInfos, toSection: .main)
+                // main or global???
+                DispatchQueue.global(qos: .background).async {
+                    _self.dataSource.apply(snapshot)
+                }
+            case .failure(let error):
+                print("😡😡😡😡")
+                print(error)
+            }
+        }
+    }
+    
+    func downloadGif(_ gif: Gif) {
+        imageCache.loadData(for: gif) { [weak self] item, gifData in
+            guard let _self = self else {
+                return
+            }
+            
+            guard let gifData = gifData,
+                  let gifObject = item as? Gif,
+                  gifObject.image != gifData
+            else {
+                return
+            }
+            
+            gifObject.image = gifData
+            
+            var snapshot = _self.dataSource.snapshot()
+            if snapshot.indexOfItem(gifObject) == nil {
+                return
+            }
+            snapshot.reloadItems([gifObject])
+            DispatchQueue.global(qos: .background).async {
+                _self.dataSource.apply(snapshot)
+            }
+        }
     }
 }
 
@@ -64,83 +129,6 @@ extension SearchGifViewModel {
         DispatchQueue.main.async {
             self.dataSource.apply(newSnapshot)
             completion()
-        }
-    }
-}
-
-extension SearchGifViewModel {
-    func loadData() {
-        dispatchGroup.enter()
-        viewState = .isLoding
-        
-        fetchGifInfo(with: searchStrig, page: currentPage) { [weak self] gifs in
-            guard let _self = self else {
-                return
-            }
-            _self.dispatchGroup.enter()
-            
-            _self.applySnapshot(with: gifs) {
-                gifs.forEach { gif in
-                    
-                    _self.dispatchGroup.enter()
-                    
-                    _self.downloadGif(gif.imageURL) { image in
-                        gif.image = image
-                        _self.reloadSnapshot(with: gif)
-                        _self.dispatchGroup.leave()
-                    }
-                }
-                _self.dispatchGroup.leave()
-            }
-            
-            _self.dispatchGroup.leave()
-            _self.dispatchGroup.notify(queue: .global(qos: .background)) {
-                _self.viewState = .idle
-            }
-        }
-    }
-    
-    func fetchGifInfo(with gifName: String, page: Page, completion: @escaping ([Gif]) -> Void) {
-        if gifName == "" {
-            return
-        }
-        
-        let gifSearchRequestDTO = GifSearchRequestDTO(gifName: gifName, offset: page.offset)
-        let endpoint = APIEndpoints.getGifSearchInfo(with: gifSearchRequestDTO)
-        
-        print("👀👀👀 \(gifSearchRequestDTO.offset)")
-        
-        provider.request(with: endpoint) { [weak self] result in
-            guard let _self = self else {
-                return
-            }
-            
-            switch result {
-            case .success(let data):
-                completion(data.toDomainGif())
-                _self.currentPage = data.toDomainPage()
-                print(data.pagination)
-            case .failure(let error):
-                print("😡😡😡😡")
-                print(error)
-            }
-        }
-    }
-    
-    func downloadGif(_ urlString: String, completion: @escaping (UIImage?) -> Void) {
-        provider.request(with: urlString) { [weak self] result in
-            switch result {
-            case .success(let data):
-                guard let _self = self else {
-                    return
-                }
-                let image = _self.decoder.decodedImage(with: data)
-                completion(image)
-            case .failure(let error):
-                print("😡😡😡😡😡😡😡😡😡😡😡😡")
-                print(error)
-                completion(nil)
-            }
         }
     }
 }

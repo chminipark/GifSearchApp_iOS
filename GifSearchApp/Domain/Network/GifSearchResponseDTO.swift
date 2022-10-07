@@ -29,7 +29,6 @@ struct GifSearchResponseDTO: Decodable {
             }
             
             enum CodingKeys: String, CodingKey {
-//                case imageWithFixedHeight = "fixed_height"
                 case imageWithFixedHeight = "fixed_height_downsampled"
             }
         }
