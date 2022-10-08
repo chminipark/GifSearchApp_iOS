@@ -110,25 +110,3 @@ extension SearchGifViewModel {
         }
     }
 }
-
-extension SearchGifViewModel {
-    func reloadSnapshot(with gif: Gif) {
-        var newSnapshot = self.dataSource.snapshot()
-        newSnapshot.reloadItems([gif])
-        DispatchQueue.main.async {
-            self.dataSource.apply(newSnapshot)
-        }
-    }
-    
-    func applySnapshot(with gifs: [Gif], completion: @escaping () -> ()) {
-        var newSnapshot = self.dataSource.snapshot()
-        if newSnapshot.sectionIdentifiers.isEmpty {
-            newSnapshot.appendSections([.main])
-        }
-        newSnapshot.appendItems(gifs, toSection: .main)
-        DispatchQueue.main.async {
-            self.dataSource.apply(newSnapshot)
-            completion()
-        }
-    }
-}
