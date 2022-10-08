@@ -48,6 +48,14 @@ class SearchGifViewModel {
         currentPage = Page()
         fetchGifInfos()
     }
+    
+    func prefetchGif(at indexPath: IndexPath) {
+        guard let gif = dataSource.itemIdentifier(for: indexPath) else {
+            return
+        }
+        
+        imageCache.prefetchGif(for: gif)
+    }
 }
 
 extension SearchGifViewModel {
@@ -66,7 +74,6 @@ extension SearchGifViewModel {
             switch result {
             case .success(let data):
                 _self.currentPage = data.toDomainPage()
-                print(_self.currentPage.offset)
                 let gifInfos = data.toDomainGif()
                 var snapshot = _self.dataSource.snapshot()
                 if snapshot.sectionIdentifiers.isEmpty {
@@ -107,28 +114,6 @@ extension SearchGifViewModel {
             DispatchQueue.global(qos: .background).async {
                 _self.dataSource.apply(snapshot)
             }
-        }
-    }
-}
-
-extension SearchGifViewModel {
-    func reloadSnapshot(with gif: Gif) {
-        var newSnapshot = self.dataSource.snapshot()
-        newSnapshot.reloadItems([gif])
-        DispatchQueue.main.async {
-            self.dataSource.apply(newSnapshot)
-        }
-    }
-    
-    func applySnapshot(with gifs: [Gif], completion: @escaping () -> ()) {
-        var newSnapshot = self.dataSource.snapshot()
-        if newSnapshot.sectionIdentifiers.isEmpty {
-            newSnapshot.appendSections([.main])
-        }
-        newSnapshot.appendItems(gifs, toSection: .main)
-        DispatchQueue.main.async {
-            self.dataSource.apply(newSnapshot)
-            completion()
         }
     }
 }
