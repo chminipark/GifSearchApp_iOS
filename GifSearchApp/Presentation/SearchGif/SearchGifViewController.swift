@@ -121,12 +121,9 @@ extension SearchGifViewController: UICollectionViewDelegate {
 
 extension SearchGifViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
-//        print("😈😈😈😈😈😈😈😈test")
-//        if !indexPaths.isEmpty {
-//            for index in indexPaths {
-//                print(index.row, terminator: " ")
-//            }
-//        }
+        indexPaths.forEach {
+            searchGifViewModel.prefetchGif(at: $0)
+        }
     }
 }
 

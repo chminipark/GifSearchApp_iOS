@@ -48,6 +48,14 @@ class SearchGifViewModel {
         currentPage = Page()
         fetchGifInfos()
     }
+    
+    func prefetchGif(at indexPath: IndexPath) {
+        guard let gif = dataSource.itemIdentifier(for: indexPath) else {
+            return
+        }
+        
+        imageCache.prefetchGif(for: gif)
+    }
 }
 
 extension SearchGifViewModel {
@@ -66,7 +74,6 @@ extension SearchGifViewModel {
             switch result {
             case .success(let data):
                 _self.currentPage = data.toDomainPage()
-                print(_self.currentPage.offset)
                 let gifInfos = data.toDomainGif()
                 var snapshot = _self.dataSource.snapshot()
                 if snapshot.sectionIdentifiers.isEmpty {
