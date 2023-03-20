@@ -9,23 +9,23 @@ import Foundation
 import UIKit
 
 class Gif: Item {
-    var image: UIImage?
-    var imageURL: String
-    let identifier = UUID()
-    
-    init(image: UIImage? = nil, imageURL: String) {
-        self.image = image
-        self.imageURL = imageURL
-    }
+  var image: UIImage?
+  var imageURL: String
+  let identifier = UUID()
+  
+  init(image: UIImage? = nil, imageURL: String) {
+    self.image = image
+    self.imageURL = imageURL
+  }
 }
 
 extension Gif: Hashable {
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
-        
-    }
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(identifier)
     
-    static func == (lhs: Gif, rhs: Gif) -> Bool {
-        return lhs.identifier == rhs.identifier
-    }
+  }
+  
+  static func == (lhs: Gif, rhs: Gif) -> Bool {
+    return lhs.identifier == rhs.identifier
+  }
 }

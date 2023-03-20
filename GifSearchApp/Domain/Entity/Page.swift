@@ -8,9 +8,9 @@
 import Foundation
 
 class Page {
-    var offset: Int
-    
-    init(offset: Int = 0) {
-        self.offset = offset
-    }
+  var offset: Int
+  
+  init(offset: Int = 0) {
+    self.offset = offset
+  }
 }

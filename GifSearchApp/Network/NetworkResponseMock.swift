@@ -8,7 +8,7 @@
 import Foundation
 
 struct NetworkResponseMock {
-    static let gifSearchData: Data = """
+  static let gifSearchData: Data = """
     {
       "data" : [{
                   "type" : "gif",

@@ -8,13 +8,14 @@
 import Foundation
 
 struct APIEndpoints {
-    static func getGifSearchInfo(with gifSearchRequestDTO: GifSearchRequestDTO) -> Endpoint<GifSearchResponseDTO> {
-        return Endpoint(
-            baseURL: "https://api.giphy.com/",
-            path: "/v1/gifs/search",
-            method: .get,
-            queryParameters: gifSearchRequestDTO,
-            sampleData: NetworkResponseMock.gifSearchData
-            )
-    }
+  static func getGifSearchInfo(with gifSearchRequestDTO: GifSearchRequestDTO)
+  -> Endpoint<GifSearchResponseDTO> {
+    return Endpoint(
+      baseURL: "https://api.giphy.com/",
+      path: "/v1/gifs/search",
+      method: .get,
+      queryParameters: gifSearchRequestDTO,
+      sampleData: NetworkResponseMock.gifSearchData
+    )
+  }
 }

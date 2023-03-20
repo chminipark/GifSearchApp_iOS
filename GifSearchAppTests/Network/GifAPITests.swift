@@ -6,11 +6,9 @@
 //
 
 import XCTest
-
 @testable import GifSearchApp
 
 class GifAPITests: XCTestCase {
-    
     var sut: Provider!
     
     override func setUpWithError() throws {
